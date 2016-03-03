@@ -1,13 +1,15 @@
 (function (window, document) {
-
     var video = document.getElementsByTagName('video')[0],
         videoContainer = document.getElementById('video_container'),
         videoControls = document.getElementById('video_controls')
         play = document.getElementById('play'),
 
-        progressContainer = document.getElementById('progress'),
-        progressHolder = document.getElementById('progress_box'),
-        playProgressBar = document.getElementById('play_progress'),
+        progress = document.getElementById('progress'),
+        progressBar = document.getElementById('progress-bar'),
+
+        muteButton = document.getElementById('mute'),
+        volumeUpButton = document.getElementById('volume_up'),
+        volumeDownButton = document.getElementById('volume_down'),
 
         fullScreenToggleButton = document.getElementById('fullScreen'),
         isFullScreen = !!(document.fullScreen || document.webkitIsFullScreen || document.mozFullScreen || document.msFullscreenElement || document.fullscreenElement);
@@ -25,6 +27,23 @@
             console.log('remove all default controls');
 
             video.addEventListener('loadeddata', this.initializeControls, false);
+
+            video.addEventListener('loadedmetadata', function () {
+                progress.setAttribute('max', video.duration);
+            }, false);
+
+            video.addEventListener('timeupdate', function () {
+                if (!progress.getAttribute('max')) {
+                    progress.setAttribute('max', video.duration);
+                }
+                progress.value = video.currentTime;
+                progressBar.style.width = Math.floor((video.currentTime / video.duration) * 100) + '%';
+            }, false);
+
+            progress.addEventListener('click', function (e) {
+                var pos = (e.pageX - this.offsetLeft) / this.offsetWidth;
+                video.currentTime = pos * video.duration;
+            }, false);
 
             this.handleButtonPresses();
 
@@ -79,6 +98,14 @@
                 this.currentTime = 0;
                 this.pause();
             }, false);
+
+            volumeUpButton.addEventListener('click', function () {
+                videoPlayer.alterVolume('+');
+            }, false);
+
+            volumeDownButton.addEventListener('click', function () {
+                videoPlayer.alterVolume('-');
+            }, false);
         },
         playPause: function () {
             if (video.paused || video.ended) {
@@ -90,77 +117,6 @@
             } else {
                 video.pause();
             }
-        },
-        fullScreenOn: function () {
-            console.log('fullScreen toggle');
-            isVideoFullScreen = true;
-            video.style.cssText = 'position: fixed; width: ' + window.innerWidth + 'px; height: ' + window.innerHeight + 'px;';
-
-            video.className = 'fullScreenVideo';
-            videoControls.className = 'fs-control';
-            fullScreenToggleButton.className = 'fs-active control';
-
-            document.addEventListener('keydown', this.checkKeyCode, false);
-        },
-        fullScreenOff: function () {
-            console.log('fullScreen off');
-            isVideoFullScreen = false;
-
-            video.style.position = 'static';
-
-            video.className = '';
-            videoControls.className = '';
-            fullScreenToggleButton.className = 'control';
-        },
-        checkKeyCode: function (e) {
-            e = e || window.event;
-            if ((e.keyCode || e.which) === 27) {
-                videoPlayer.fullScreenOff();
-            }
-        },
-        trackPlayProgress: function () {
-            (function progressTrack() {
-                videoPlayer.updatePlayProgress();
-                playProgressInterval = setTimeout(progressTrack, 50);
-            })();
-        },
-        updatePlayProgress: function () {
-            playProgressBar.style.width = ((video.currentTime / video.duration) * (progressHolder.offsetWidth)) + "px";
-        },
-        stopTrackingPlayProgress: function () {
-            clearTimeout(playProgressInterval);
-        },
-        videoScrubbing: function () {
-            progressHolder.addEventListener('mousedown', function () {
-                videoPlayer.stopTrackingPlayProgress();
-
-                videoPlayer.playPause();
-                document.onmousemove = function (e) {
-                    videoPlayer.setPlayProgress(e.pageX);
-                }
-
-                progressHolder.onmouseup = function (e) {
-                    document.onmouseup = null;
-                    document.onmousemove = null;
-
-                    video.play();
-                    videoPlayer.setPlayProgress(e.pageX);
-                    videoPlayer.trackPlayProgress();
-                }
-            }, true);
-        },
-        setPlayProgress: function (clickX) {
-            var newPercent = Math.max(0, Math.min(1, (clickX - this.findPosX(progressHolder)) / progressHolder.offsetWidth));
-            video.currentTime = newPercent * video.duration;
-            playProgressBar.style.width = newPercent * (progressHolder.offsetWidth) + "px";
-        },
-        findPosX: function (progressHolder) {
-            var curLeft = progressHolder.offsetLeft;
-            while(progressHolder = progressHolder.offsetParent) {
-                curLeft += progressHolder.offsetLeft;
-            }
-
-            return curLeft;
         },
         handleFullscreen: function () {
             if (isFullScreen) {
@@ -191,6 +147,20 @@
         },
         setFullscreenData: function (state) {
             videoContainer.setAttribute('data-fullscreen', !!state);
+        },
+        alterVolume: function (direction) {
+            console.log(video.volume);
+            var currentVolume = Math.floor(video.volume * 10) / 10;
+
+            if (direction === '+') {
+                if (currentVolume < 1) {
+                    video.volume += 0.1;
+                }
+            } else if (direction === '-') {
+                if (currentVolume > 0) {
+                    video.volume -= 0.1;
+                }
+            }
         }
     };
 

@@ -5,28 +5,29 @@
     <head>
         <meta charset="utf-8">
         <title>Custom HTML5 Video Player</title>
-        <!--<link rel="stylesheet" href="css/style.css"/>-->
+        <link rel="stylesheet" href="css/style.css"/>
     </head>
 
     <body id="container">
         <h1> HTML5 Video </h1>
         <div id="video_container">
             <video controls width=1000 preload poster="http://ww3.sinaimg.cn/orj480/736f0c7ejw1ezz3nc2sctj20lc0dc0tn.jpg">
-                <source src="http://nettuts.s3.amazonaws.com/763_sammyJSIntro/trailer_test.mp4" type="video/mp4">
-                <source src="http://nettuts.s3.amazonaws.com/763_sammyJSIntro/trailer_test.ogg" type="video/ogg">
+                <source src="video/trailer_test.mp4" type="video/mp4">
+                <!--<source src="video/trailer_test.ogg" type="video/ogg">-->
             </video>
 
             <div id="video_controls">
-                <button id="play" title="Play"> &#x25BA; </button>
-
-                <div id="progress">
-                    <div id="progress_box">
-                        <span id="play_progress"></span>
-                    </div>
+                <button type="button" id="play" title="Play"> &#x25BA; </button>
+                <div class="progress">
+                    <progress id="progress" value="0" min="0">
+                        <span id="progress-bar"></span>
+                    </progress>
                 </div>
-
+                <button id="mute">Mute</button>
+                <button id="volume_up">Vol+</button>
+                <button id="volume_down">Vol-</button>
                 <button id="fullScreen" title="FullScreen Toggle"> FS </button>
-                <a href="http://unixera.com"><img src="http://7xn2pe.com1.z0.glb.clouddn.com/squirrel.png" alt="Tuts" id="video_TutsLogo"/></a>
+                <!--<a href="http://unixera.com"><img src="http://7xn2pe.com1.z0.glb.clouddn.com/squirrel.png" alt="Tuts" id="video_TutsLogo"/></a>-->
             </div>
         </div>
 
